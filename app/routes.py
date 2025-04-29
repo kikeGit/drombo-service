@@ -1,5 +1,4 @@
 from flask import Blueprint, jsonify
-from .models import User
 
 main = Blueprint('main', __name__)
 
@@ -7,7 +6,29 @@ main = Blueprint('main', __name__)
 def index():
     return jsonify({"message": "Hola desde Flask!"})
 
-@main.route('/users')
-def get_users():
-    users = User.query.all()
-    return jsonify([{"id": u.id, "username": u.username} for u in users])
+
+# get_transfers
+
+# get_transfer (get one)
+
+# post_transfer
+
+# update_transfer
+
+# delete_transfer
+
+# get_routes (date) - return all routes scheduled for today
+
+# get_routes - return all routes 
+
+
+# postpone_route - TBD
+
+# send_route_to_rigitech (BLOQUEADO POR FRANCO)
+
+
+## CRONJOBS
+
+# recalculate_routes - Every 5 minutes
+# update_transfer_status - Once per day
+# create_routin_transfers - Once per week 
