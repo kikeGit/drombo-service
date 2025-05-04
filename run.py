@@ -1,5 +1,5 @@
 from app import create_app, db
-from . import models
+from app import models  # <-- Use absolute import instead of relative
 
 app = create_app()
 

@@ -84,6 +84,27 @@ class Transfer(db.Model):
     @property
     def weight(self):
         return sum(supply.weight or 0 for supply in self.supplies)
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "type": self.type.value,
+            "request_date": self.request_date.isoformat(),
+            "requester": self.requester,
+            "start_date": self.start_date.isoformat(),
+            "end_date": self.end_date.isoformat(),
+            "start_time": self.start_time.isoformat(),
+            "end_time": self.end_time.isoformat(),
+            "compartment": self.compartment.value,
+            "urgency": self.urgency.value if self.urgency else None,
+            "status": self.status.value if self.status else None,
+            "clinic_id": self.clinic_id,
+            "routine_id": self.routine_id,
+            "route_id": self.route_id,
+            "operation_id": self.operation_id,
+            "weight": self.weight,
+            "supplies": [s.to_dict() for s in self.supplies]
+        }
 
 
 class Supply(db.Model):
@@ -98,6 +119,15 @@ class Supply(db.Model):
     transfer_id = db.Column(db.String, db.ForeignKey('transfers.id'), nullable=False)
     transfer = db.relationship('Transfer', back_populates='supplies')
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "quantity": self.quantity,
+            "weight": self.weight,
+            "notes": self.notes
+        }
+
 
 class Route(db.Model):
     __tablename__ = 'routes'
@@ -106,8 +136,17 @@ class Route(db.Model):
     date = db.Column(db.Date, nullable=False)
     time = db.Column(db.Time, nullable=False)
 
-    transfers = db.relationship('Transfer', back_populates='route', cascade='all, delete-orphan')
+    transfers  = db.relationship('Transfer', back_populates='route', cascade='all, delete-orphan')
     operations = db.relationship('Operation', back_populates='route', cascade='all, delete-orphan')
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "date": self.date.isoformat(),
+            "time": self.time.isoformat(),
+            "transfer_ids": [t.id for t in self.transfers],
+            "operation_ids": [op.id for op in self.operations]
+        }
 
 
 class Operation(db.Model):
