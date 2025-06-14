@@ -1,0 +1,171 @@
+Aca termina el dia 1
+Depot 00:00 ->Cloruro de sodio 07:00 ->Paracetamol 07:36 ->Anticonceptivos 08:57 ->Material de curación 10:36 ->Producto_7548 12:13 ->Producto_7622 14:06 ->Depot 17:21 ->
+Depot 17:21 ->Producto_2269 17:55 ->Depot 19:04 ->
+----------------------------------------------------------- 2
+Aca termina el dia 2
+Depot 00:00 ->Lubricante médico 08:00 ->Producto_7105 08:30 ->Vacunas 10:16 ->Silla de ruedas 11:23 ->Producto_6279 13:56 ->Jeringas 16:38 ->Depot 17:47 ->
+Depot 17:47 ->Producto_4750 18:20 ->Depot 19:23 ->
+----------------------------------------------------------- 3
+Aca termina el dia 3
+Depot 00:00 ->Gel ultrasonido 09:00 ->Gasas 11:47 ->Toallas sanitarias 13:24 ->Antiepiléptico 16:00 ->Producto_2476 17:08 ->Depot 18:47 ->
+----------------------------------------------------------- 4
+Aca termina el dia 4
+Depot 00:00 ->Antiséptico 07:00 ->Guía intravenosa 08:29 ->Oxímetro 15:00 ->Depot 17:01 ->
+Depot 17:01 ->Leche maternizada 17:55 ->Depot 19:32 ->
+----------------------------------------------------------- 5
+Aca termina el dia 5
+Depot 00:00 ->Producto_3442 08:00 ->Compresas 14:00 ->Producto_4878 16:00 ->Depot 18:38 ->
+----------------------------------------------------------- 6
+Aca termina el dia 6
+Depot 00:00 ->Producto_6442 07:00 ->Betametasona 09:20 ->Producto_7149 16:00 ->Depot 18:13 ->
+----------------------------------------------------------- 7
+Aca termina el dia 7
+Depot 00:00 ->Producto_4467 07:00 ->Tiras reactivas 09:11 ->Loratadina 10:44 ->Centella asiática 11:26 ->Suplemento hierro 13:05 ->Depot 15:43 ->
+Depot 15:43 ->Producto_4388 17:23 ->Depot 19:40 ->
+----------------------------------------------------------- 8
+Aca termina el dia 8
+Depot 00:00 ->Marcapasos 13:00 ->Cánulas 15:56 ->Depot 18:01 ->
+----------------------------------------------------------- 9
+Aca termina el dia 9
+Depot 00:00 ->Estetoscopio 08:00 ->Producto_2746 09:00 ->Producto_2684 12:00 ->Omeprazol 13:53 ->Producto_2129 15:34 ->Depot 18:44 ->
+----------------------------------------------------------- 10
+Aca termina el dia 10
+Depot 00:00 ->Producto_1803 07:00 ->Mascarilla 09:00 ->Catéter 10:00 ->Amoxicilina 11:16 ->Producto_7730 16:00 ->Depot 18:32 ->
+----------------------------------------------------------- 11
+Aca termina el dia 11
+Depot 00:00 ->Guantes 14:00 ->Analgésicos 15:32 ->Depot 19:10 ->
+----------------------------------------------------------- 12
+Aca termina el dia 12
+Depot 00:00 ->Nebulizador 17:00 ->Depot 19:52 ->
+----------------------------------------------------------- 13
+Aca termina el dia 13
+Depot 00:00 ->Producto_5342 08:00 ->Prueba embarazo 13:00 ->Producto_3091 14:15 ->Depot 16:20 ->
+Depot 16:20 ->Producto_8141 16:53 ->Depot 18:03 ->
+----------------------------------------------------------- 14
+Aca termina el dia 14
+Depot 00:00 ->Antibióticos 07:00 ->Producto_8784 09:00 ->Producto_5349 11:00 ->Depot 13:45 ->
+Depot 13:45 ->Producto_1653 14:40 ->Producto_3085 15:51 ->Depot 17:50 ->
+----------------------------------------------------------- 15
+Aca termina el dia 15
+Depot 00:00 ->Producto_4114 08:00 ->Kit COVID 10:03 ->Producto_6802 13:00 ->Depot 14:32 ->
+Depot 14:32 ->Producto_6139 15:55 ->Producto_8900 16:37 ->Depot 18:31 ->
+----------------------------------------------------------- 16
+Aca termina el dia 16
+Depot 00:00 ->Salbutamol 08:00 ->Producto_8251 14:00 ->Depot 17:27 ->
+----------------------------------------------------------- 17
+Aca termina el dia 17
+Depot 00:00 ->Producto_6733 07:00 ->Producto_5941 08:43 ->Depot 10:43 ->
+Depot 10:43 ->Suturas 11:49 ->Producto_5425 13:20 ->Producto_7371 14:41 ->Producto_4531 17:02 ->Depot 18:55 ->
+----------------------------------------------------------- 18
+Aca termina el dia 18
+Depot 00:00 ->Producto_7528 10:00 ->Producto_7209 12:51 ->Producto_7865 14:37 ->Producto_2330 17:00 ->Depot 19:47 ->
+----------------------------------------------------------- 19
+Aca termina el dia 19
+Depot 00:00 ->Producto_9071 07:00 ->Producto_2771 11:00 ->Producto_2052 13:00 ->Insulina 14:31 ->Depot 17:16 ->
+Depot 17:16 ->Producto_7232 17:56 ->Depot 19:17 ->
+----------------------------------------------------------- 20
+Aca termina el dia 20
+Depot 00:00 ->Prednisona 10:00 ->Medidor glucosa 12:17 ->Equipos ECG 13:46 ->Depot 16:56 ->
+----------------------------------------------------------- 21
+Aca termina el dia 21
+Depot 00:00 ->Producto_5930 13:00 ->Producto_8022 16:00 ->Depot 18:56 ->
+----------------------------------------------------------- 22
+Aca termina el dia 22
+Depot 00:00 ->Producto_5050 09:00 ->Producto_2874 10:12 ->Depot 12:45 ->
+Depot 12:45 ->Producto_7906 15:16 ->Producto_7078 16:36 ->Producto_5564 17:12 ->Depot 19:05 ->
+----------------------------------------------------------- 23
+Aca termina el dia 23
+Depot 00:00 ->Producto_6813 12:00 ->Producto_2320 13:28 ->Producto_7693 15:00 ->Depot 18:25 ->
+----------------------------------------------------------- 24
+Aca termina el dia 24
+Depot 00:00 ->Producto_1878 08:00 ->Probeta 11:00 ->Monitor fetal 16:00 ->Depot 19:28 ->
+----------------------------------------------------------- 25
+Aca termina el dia 25
+Depot 00:00 ->Producto_3361 08:00 ->Termómetro 09:34 ->Producto_8679 11:00 ->Producto_8941 12:48 ->Depot 15:26 ->
+Depot 15:26 ->Producto_5720 16:20 ->Producto_1510 17:31 ->Depot 19:22 ->
+----------------------------------------------------------- 26
+Aca termina el dia 26
+Depot 00:00 ->Producto_8239 09:00 ->Producto_4826 11:05 ->Producto_2876 11:47 ->Depot 15:02 ->
+Depot 15:02 ->Producto_5505 16:08 ->Depot 17:45 ->
+----------------------------------------------------------- 27
+Aca termina el dia 27
+Depot 00:00 ->Producto_1685 15:00 ->Producto_4629 16:00 ->Depot 19:05 ->
+----------------------------------------------------------- 28
+Aca termina el dia 28
+Depot 00:00 ->Producto_2146 07:00 ->Producto_6374 08:23 ->Producto_9698 11:00 ->Depot 12:31 ->
+Depot 12:31 ->Sueros 15:29 ->Depot 19:10 ->
+----------------------------------------------------------- 29
+Aca termina el dia 29
+Depot 00:00 ->Producto_8541 10:00 ->Producto_5952 11:17 ->Producto_7686 13:00 ->Producto_2713 15:14 ->Depot 16:57 ->
+----------------------------------------------------------- 30
+Aca termina el dia 30
+Depot 00:00 ->Producto_4394 09:00 ->Producto_6934 14:00 ->Depot 17:34 ->
+----------------------------------------------------------- 31
+Aca termina el dia 31
+Depot 00:00 ->Producto_2858 08:00 ->Producto_3370 09:52 ->Producto_3306 11:44 ->Depot 13:05 ->
+Depot 13:05 ->Producto_6585 13:38 ->Depot 14:47 ->
+Depot 14:47 ->Producto_9494 16:04 ->Depot 17:51 ->
+----------------------------------------------------------- 32
+Aca termina el dia 32
+Depot 00:00 ->Producto_8894 11:00 ->Producto_5381 16:00 ->Depot 18:52 ->
+----------------------------------------------------------- 33
+Aca termina el dia 33
+Depot 00:00 ->Producto_4241 08:00 ->Producto_9779 09:33 ->Producto_5347 10:55 ->Depot 14:23 ->
+Depot 14:23 ->Producto_6120 15:49 ->Depot 17:58 ->
+----------------------------------------------------------- 34
+Aca termina el dia 34
+Depot 00:00 ->Producto_5781 09:00 ->Producto_1349 09:48 ->Producto_5938 13:00 ->Depot 16:29 ->
+----------------------------------------------------------- 35
+Aca termina el dia 35
+Depot 00:00 ->Producto_3068 09:00 ->Producto_3330 10:36 ->Depot 12:50 ->
+Depot 12:50 ->Producto_5520 14:14 ->Depot 16:07 ->
+----------------------------------------------------------- 36
+Aca termina el dia 36
+Depot 00:00 ->Producto_1422 09:00 ->Producto_9149 11:00 ->Producto_8267 13:00 ->Depot 16:14 ->
+----------------------------------------------------------- 37
+Aca termina el dia 37
+Depot 00:00 ->Producto_5891 11:00 ->Producto_5458 16:00 ->Depot 18:56 ->
+----------------------------------------------------------- 38
+Aca termina el dia 38
+Depot 00:00 ->Producto_1893 09:00 ->Producto_7464 13:00 ->Depot 15:52 ->
+----------------------------------------------------------- 39
+Aca termina el dia 39
+Depot 00:00 ->Producto_8972 08:00 ->Producto_8056 09:25 ->Depot 13:00 ->
+Depot 13:00 ->Producto_3369 14:40 ->Producto_8048 16:32 ->Depot 19:58 ->
+----------------------------------------------------------- 40
+Aca termina el dia 40
+Depot 00:00 ->Producto_6661 15:00 ->Depot 17:20 ->
+----------------------------------------------------------- 41
+Aca termina el dia 41
+Depot 00:00 ->Producto_3870 11:00 ->Producto_8770 12:31 ->Depot 15:50 ->
+----------------------------------------------------------- 42
+Aca termina el dia 42
+Depot 00:00 ->Producto_2940 11:00 ->Depot 14:02 ->
+Depot 14:02 ->Producto_1841 16:40 ->Depot 19:53 ->
+----------------------------------------------------------- 43
+Aca termina el dia 43
+Depot 00:00 ->Producto_8802 15:00 ->Depot 17:44 ->
+----------------------------------------------------------- 44
+Aca termina el dia 44
+Depot 00:00 ->Producto_5295 08:00 ->Producto_3344 10:19 ->Depot 14:06 ->
+----------------------------------------------------------- 45
+Aca termina el dia 45
+Depot 00:00 ->Producto_5438 12:00 ->Depot 14:52 ->
+----------------------------------------------------------- 46
+Aca termina el dia 46
+Depot 00:00 ->Producto_9837 09:00 ->Depot 12:01 ->
+Depot 12:01 ->Producto_1153 14:40 ->Depot 17:55 ->
+----------------------------------------------------------- 47
+Aca termina el dia 47
+Depot 00:00 ->Producto_6881 08:00 ->Depot 11:25 ->
+Depot 11:25 ->Producto_4630 14:07 ->Depot 17:18 ->
+----------------------------------------------------------- 48
+Aca termina el dia 48
+Depot 00:00 ->Producto_2293 13:00 ->Depot 16:31 ->
+----------------------------------------------------------- 49
+Aca termina el dia 49
+Depot 00:00 ->Producto_4868 12:00 ->Depot 15:35 ->
+----------------------------------------------------------- 50
+Aca termina el dia 50
+Depot 00:00 ->Producto_9742 13:00 ->Depot 16:47 ->
+----------------------------------------------------------- 51
