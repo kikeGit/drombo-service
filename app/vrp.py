@@ -102,7 +102,7 @@ class Node:
     def __init__(self, policlinic, demand, time_window, service_time, delivery_name, delivery_type, box_type):
         self.policlinic: int = policlinic
         self.demand: int = demand
-        self.time_window: Tuple[int, int] = time_window
+        self.time_window: Tuple[float, float] = time_window
         self.service_time: int = service_time
         self.delivery_name: str  = delivery_name
         self.delivery_type: str = delivery_type
@@ -118,9 +118,8 @@ class VRPTW_MultipleDeliveries:
 
     routes_by_day = {}
 
-    def __init__(self, deliveries, depot, distances, vehicle_capacity, max_vehicles):
+    def __init__(self, depot, distances, vehicle_capacity, max_vehicles):
         self.depot: Node = depot
-        self.deliveries: List[Node] = deliveries
         self.distances: np.ndarray = distances
         self.vehicle_capacity: int = vehicle_capacity
         self.max_vehicles: int = max_vehicles
@@ -135,7 +134,7 @@ class VRPTW_MultipleDeliveries:
                 start_service = self.set_start_service_times(predefined_route) # pls
                 start_service.pop()
             
-            return predefined_route, [], None, start_service
+            return predefined_route, [], [], start_service
         
         #routes = []
         unrouted_deliveries_copy = unrouted_deliveries.copy()
@@ -161,7 +160,7 @@ class VRPTW_MultipleDeliveries:
                     "MEDIUM": 0,
                     "BIG": 0,
                 }
-                route: List[Node] = [depot_copy]
+                route: List[Node] = [depot_copy] # la hora del sistema
                 loads_by_node = [0]
                 boxes_by_node = [boxes_info]
 
@@ -219,7 +218,7 @@ class VRPTW_MultipleDeliveries:
                 
                 break
         
-        return route, unrouted_deliveries_copy, impossible_node, start_service
+        return route, unrouted_deliveries_copy, impossible_nodes, start_service
 
     def print_route(route: List[Node]):
         str_to_print = ''

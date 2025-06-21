@@ -1,11 +1,25 @@
-from app import create_app, db
-from app import models  # <-- Use absolute import instead of relative
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.dialects.postgresql import ARRAY
+import enum
+import atexit
+
+from app import create_app
+from app.db import db  # ✅ MUST come from app.db, not redefined
+from app.cronjobs import Cronjob
 
 app = create_app()
 
-# Crear tablas si no existen
-with app.app_context():
-    db.create_all()
+def main():
+    with app.app_context():
+        db.create_all()
+        print("✅ Tables created.")
+        
+        # Start your cronjob system with access to app context
+        scheduler = Cronjob(db, app)
+        scheduler.start()
+
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    main()
+    app.run(debug=False)

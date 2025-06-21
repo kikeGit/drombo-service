@@ -1,30 +1,46 @@
 import psycopg2
+from app import create_app, db
+from sqlalchemy import text
 
 def run_seed():
-
-    from app import create_app, db
-
-    # Create a Flask application
+    # 1. Crear la app y contexto
     app = create_app()
-
-    # Create all the tables
+    
     with app.app_context():
+        print("⚠️  Dropping all existing tables...")
+        db.drop_all()
+        print("✅ Tables dropped.")
+
+        print("📦 Creating all tables...")
         db.create_all()
+        print("✅ Tables created.")
 
-    print("Tables created successfully!")
-
+    # 2. Conectar a PostgreSQL
     conn = psycopg2.connect(
-        dbname="drombo", user="postgres", password="postgres", host="localhost", port="5432"
+        dbname="drombo_2",
+        user="postgres",
+        password="postgres",
+        host="localhost",
+        port="5432"
     )
     cursor = conn.cursor()
 
-    with open('seed.sql', 'r') as file:
+    # 3. Ejecutar seed.sql
+    print("📥 Inserting seed data from seed.sql...")
+    with open('seed.sql', 'r', encoding='utf-8') as file:
         sql = file.read()
-    
-    cursor.execute(sql)
-    conn.commit()
-    cursor.close()
-    conn.close()
+
+    try:
+        cursor.execute(sql)
+        conn.commit()
+        print("✅ Seed data inserted successfully.")
+    except Exception as e:
+        conn.rollback()
+        print("❌ Error while inserting seed data:", e)
+    finally:
+        cursor.close()
+        conn.close()
+        print("🔚 Connection closed.")
 
 if __name__ == "__main__":
     run_seed()

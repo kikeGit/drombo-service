@@ -1,11 +1,11 @@
-from . import db
+from app.db import db  # ✅ Usa la instancia compartida
 import enum
 from sqlalchemy.dialects.postgresql import ARRAY
 
 class CompartmentSize(enum.Enum):
-    SMALL = "chico"
-    MEDIUM = "mediano"
-    LARGE = "grande"
+    SMALL = "SMALL"
+    MEDIUM = "MEDIUM"
+    LARGE = "BIG"
 
 class UrgencyLevel(enum.Enum):
     LOW = "baja"
@@ -13,14 +13,15 @@ class UrgencyLevel(enum.Enum):
     HIGH = "alta"
 
 class TransferType(enum.Enum):
-    REQUEST = "pedido"
-    SHIPMENT = "envio"
+    PEDIDO = "pedido"
+    ENVIO = "envio"
 
 class TransferStatus(enum.Enum):
     PENDING = "pendiente"
     CONFIRMED = "confirmado"
     ON_ROUTE = "en camino"
     REJECTED = "rechazado"
+    DELIVERIED = "entregado"
 
 class WeekDay(enum.Enum):
     MONDAY = "monday"
@@ -66,6 +67,8 @@ class Transfer(db.Model):
     compartment = db.Column(db.Enum(CompartmentSize), nullable=False)
     urgency = db.Column(db.Enum(UrgencyLevel), nullable=True, default=UrgencyLevel.LOW)
     status = db.Column(db.Enum(TransferStatus), nullable=True, default=TransferStatus.PENDING)
+    estimated_arrival_date = db.Column(db.Date, nullable=True)
+    estimated_arrival_time = db.Column(db.Time, nullable=True)
 
     clinic_id = db.Column(db.String, db.ForeignKey('clinics.id'), nullable=False)
     clinic = db.relationship('Clinic', back_populates='transfers')
@@ -75,7 +78,7 @@ class Transfer(db.Model):
     routine_id = db.Column(db.String, db.ForeignKey('routines.id'), nullable=True)
     routine = db.relationship('Routine', back_populates='transfers')
 
-    route_id = db.Column(db.String, db.ForeignKey('routes.id'), nullable=True)
+    route_id = db.Column(db.String, db.ForeignKey('routes.id', ondelete='SET NULL'), nullable=True)
     route = db.relationship('Route', back_populates='transfers')
 
     operation_id = db.Column(db.String, db.ForeignKey('operations.id'), nullable=True)
@@ -129,14 +132,25 @@ class Supply(db.Model):
         }
 
 
+class RouteStatus(enum.Enum):
+    READY_FOR_START = "READY_FOR_START"
+    IN_PROCESS = "IN_PROCESS"
+    COMPLETED = "COMPLETED"
+    CANCELED = "CANCELED"
+
+
 class Route(db.Model):
     __tablename__ = 'routes'
 
     id = db.Column(db.String, primary_key=True)
     date = db.Column(db.Date, nullable=False)
-    time = db.Column(db.Time, nullable=False)
+    start_time = db.Column(db.String, nullable=False)
+    end_time = db.Column(db.String, nullable=False)
+    routed_transfers_order = db.Column(db.String, nullable=False) # separado por comas
+    start_times = db.Column(db.String, nullable=False) # separado por comas
+    status = db.Column(db.Enum(RouteStatus), nullable=False, default=RouteStatus.READY_FOR_START)
 
-    transfers  = db.relationship('Transfer', back_populates='route', cascade='all, delete-orphan')
+    transfers  = db.relationship('Transfer', back_populates='route', cascade='save-update, merge')
     operations = db.relationship('Operation', back_populates='route', cascade='all, delete-orphan')
 
     def to_dict(self):

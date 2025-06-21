@@ -105,7 +105,6 @@ def __main__():
         return str_to_print    
     
     depot = Node(0, 0, (0, 20), 0, 'Depot', None, None)
-    deliveries = []       
 
     urgent_deliveries = [
         Node(35, 611, (13, 14), 0.7, 'Toallas sanitarias', 'pedido', 'SMALL'),
@@ -316,7 +315,7 @@ def __main__():
         Node(12, 629, (13, 15), 0.7, 'Producto_6802', 'envio', 'SMALL'),
     ]
 
-    varp = VRPTW_MultipleDeliveries(deliveries, depot, distances_50x50, vehicle_capacity, max_vehicles)
+    varp = VRPTW_MultipleDeliveries(depot, distances_50x50, vehicle_capacity, max_vehicles)
     routes: List[List[Node]] = []
     routes_start_services: List[List[Node]] = []
     routes_by_day = {}
@@ -386,8 +385,6 @@ def __main__():
                 
                 file.write("----------------------------------------------------------- " + str(i) + "\n")
         
-        # imprimor los dias
-
 
 
 __main__()
