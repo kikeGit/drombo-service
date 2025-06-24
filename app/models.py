@@ -52,6 +52,14 @@ class Clinic(db.Model):
     origin_operations = db.relationship('Operation', foreign_keys='Operation.origin_clinic_id', back_populates='origin_clinic')
     destination_operations = db.relationship('Operation', foreign_keys='Operation.destination_clinic_id', back_populates='destination_clinic')
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "latitude": float(self.latitude),
+            "longitude": float(self.longitude)
+        }
+
 
 class Transfer(db.Model):
     __tablename__ = 'transfers'
@@ -102,11 +110,13 @@ class Transfer(db.Model):
             "urgency": self.urgency.value if self.urgency else None,
             "status": self.status.value if self.status else None,
             "clinic_id": self.clinic_id,
+            "clinic": self.clinic.to_dict(),
             "routine_id": self.routine_id,
             "route_id": self.route_id,
             "operation_id": self.operation_id,
             "weight": self.weight,
-            "supplies": [s.to_dict() for s in self.supplies]
+            "supplies": [s.to_dict() for s in self.supplies],
+            "estimated_arrival_time": self.estimated_arrival_time.isoformat(),
         }
 
 
@@ -153,13 +163,22 @@ class Route(db.Model):
     transfers  = db.relationship('Transfer', back_populates='route', cascade='save-update, merge')
     operations = db.relationship('Operation', back_populates='route', cascade='all, delete-orphan')
 
+    @property
+    def weight(self):
+        return sum(transfer.weight or 0 for transfer in self.transfers)
+    
     def to_dict(self):
         return {
             "id": self.id,
             "date": self.date.isoformat(),
-            "time": self.time.isoformat(),
+            "start_time": self.start_time,
+            "end_time": self.end_time,
+            "routed_transfers_order": self.routed_transfers_order,
             "transfer_ids": [t.id for t in self.transfers],
-            "operation_ids": [op.id for op in self.operations]
+            "operation_ids": [op.id for op in self.operations],
+            "status": self.status.value,
+            "transfers": [transfer.to_dict() for transfer in self.transfers],
+            "weight": self.weight
         }
 
 

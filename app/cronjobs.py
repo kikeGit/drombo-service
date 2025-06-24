@@ -184,8 +184,8 @@ class Cronjob:
             db_route = Route(
                 id=route_id,
                 date=date,
-                start_time=start_depot.get_start_time_window(),
-                end_time=end_depot.get_start_time_window(),
+                start_time=self.number_to_time(start_depot.get_start_time_window()),
+                end_time=self.number_to_time(end_depot.get_start_time_window()),
                 routed_transfers_order=route_transfers_order,
                 transfers=route_transfers,
                 start_times=start_times_order,

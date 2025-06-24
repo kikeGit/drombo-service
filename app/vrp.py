@@ -450,13 +450,12 @@ class VRPTW_MultipleDeliveries:
     
 
     def check_add_new_box(self, new_box_type, node_box):
-  
         if new_box_type == "SMALL":
-            key = f"S{node_box["SMALL"] + 1}-M{node_box["MEDIUM"]}-B{node_box["BIG"]}"
+            key = f"S{node_box['SMALL'] + 1}-M{node_box['MEDIUM']}-B{node_box['BIG']}"
         elif new_box_type == "MEDIUM":
-            key = f"S{node_box["SMALL"]}-M{node_box["MEDIUM"] + 1}-B{node_box["BIG"]}"
+            key = f"S{node_box['SMALL']}-M{node_box['MEDIUM'] + 1}-B{node_box['BIG']}"
         elif new_box_type == "BIG":
-            key = f"S{node_box["SMALL"]}-M{node_box["MEDIUM"]}-B{node_box["BIG"] + 1}"
+            key = f"S{node_box['SMALL']}-M{node_box['MEDIUM']}-B{node_box['BIG'] + 1}"
         else:
             raise ValueError("new_box_type debe ser 'SMALL', 'MEDIUM' o 'BIG'")
 

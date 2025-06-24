@@ -1,5 +1,5 @@
 from flask import Blueprint, abort, jsonify, request
-from app.models import Route, Transfer
+from app.models import Route, RouteStatus, Transfer
 from app import db
 import uuid
 from datetime import date, datetime, time
@@ -59,7 +59,7 @@ def post_transfer():
         supplies_data = data.get("supplies", [])
         for supply_data in supplies_data:
             supply = Supply(
-                id=supply_data.get("id", str(uuid.uuid4())),
+                id=str(uuid.uuid4()),
                 name=supply_data["name"],
                 quantity=supply_data["quantity"],
                 weight=supply_data["weight"],
@@ -105,9 +105,9 @@ def get_routes():
 
     try:
         if date_str:
-            from_date = datetime.strptime(date_str, "%d-%m-%Y").date()
-            today = date.today()
-            routes = Route.query.filter(Route.date >= from_date, Route.date <= today).all()
+            date = datetime.strptime(date_str, "%Y-%m-%d").date()
+            print(date)
+            routes = Route.query.filter(Route.date == date, Route.status == RouteStatus.READY_FOR_START).all()
         else:
             routes = Route.query.all()
     
