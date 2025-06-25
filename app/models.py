@@ -116,7 +116,6 @@ class Transfer(db.Model):
             "operation_id": self.operation_id,
             "weight": self.weight,
             "supplies": [s.to_dict() for s in self.supplies],
-            "estimated_arrival_time": self.estimated_arrival_time.isoformat(),
         }
 
 
