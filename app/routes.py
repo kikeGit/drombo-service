@@ -1,5 +1,5 @@
 from flask import Blueprint, abort, jsonify, request
-from app.models import Route, RouteStatus, Transfer
+from app.models import Clinic, Route, RouteStatus, Transfer
 from app import db
 import uuid
 from datetime import date, datetime, time
@@ -17,7 +17,7 @@ def index():
 # get_transfers
 @transfers_bp.route('/transfers', methods=['GET'])
 def get_transfers():
-    transfers = Transfer.query.all()
+    transfers = Transfer.query.order_by(Transfer.request_date.desc()).all()
     return jsonify([transfer.to_dict() for transfer in transfers])
 
 # get_transfer (get one)
@@ -117,6 +117,12 @@ def get_routes():
     return jsonify([route.to_dict() for route in routes]), 200
 
 # get_routes - return all routes 
+
+# get_clinics - return all clinics
+@transfers_bp.route('/clinics', methods=['GET'])
+def get_clinics():
+    clinics = Clinic.query.all()
+    return jsonify([clinic.to_dict() for clinic in clinics]), 200
 
 
 # postpone_route - TBD
