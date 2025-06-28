@@ -5,7 +5,7 @@
       "name": "Python: Current File",
       "type": "python",
       "request": "launch",
-      "program": "${workspaceFolder}/vrp_test.py",  // runs the currently open file
+      "program": "${workspaceFolder}/run.py",  // runs the currently open file
       "console": "integratedTerminal"
     }
   ]

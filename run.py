@@ -7,6 +7,7 @@ import atexit
 from app import create_app
 from app.db import db  # ✅ MUST come from app.db, not redefined
 from app.cronjobs import Cronjob
+from app.rigi import RestClient
 
 app = create_app()
 
@@ -18,6 +19,8 @@ def main():
         # Start your cronjob system with access to app context
         scheduler = Cronjob(db, app)
         scheduler.start()
+        client = RestClient()
+        client.get_routes()
 
 
 if __name__ == '__main__':

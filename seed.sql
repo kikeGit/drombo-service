@@ -8,12 +8,15 @@ TRUNCATE TABLE routines CASCADE;
 
 -- Insert Clinics (no dependencies)
 INSERT INTO clinics (id, name, latitude, longitude, average_wait_time) VALUES
+('0', 'H. de Tacuarembó', -34.9011, -56.1645, 0.2),
 ('1', 'Tambores', -34.9011, -56.1645, 0.2),
-('2', 'Curtinas', -34.8808, -56.1805, 1.2),
+('2', 'Curtina', -34.8808, -56.1805, 1.2),
 ('3', 'Sauce del Batovi', -34.9210, -56.1510, 1),
 ('4', 'Ansina', -34.9000, -56.1400, 0.9),
 ('5', 'Rivera', -34.9100, -56.1700, 1.5),
-('6', 'Piedra Sola', -34.9190, -56.1760, 0.2);
+('6', 'Piedra Sola', -34.9190, -56.1760, 0.2),
+('7', 'Paso del Cerro', -31.9190, -55.1760, 0.2);
+
 
 
 INSERT INTO transfers (
@@ -88,3 +91,19 @@ INSERT INTO supplies (id, name, weight, quantity, notes, transfer_id) VALUES
 
 -- t15
 ('s20', 'Mascarillas quirúrgicas', 1100, 20, NULL, 't15');
+
+
+INSERT INTO rigi_routes (id, rigi_id, clinic_origin, clinic_destination, distance_km, flight_time_minutes) VALUES
+(1, 1648, '0', '1', 32.13, '00:20'),
+(2, 1610, '0', '2', 53.46, '00:32'),
+(3, 1710, '0', '3', 21.41, '00:14'),
+(9, 1899, '0', '4', 64.33, '00:38'),
+(7, 1711, '0', '6', 51.31, '00:31'),
+(6, 1690, '0', '7', 35.94, '00:22'),
+(4, 1636, '1', '0', 32.15, '00:20'),
+(5, 1649, '2', '0', 53.48, '00:32'),
+(13, 1710, '3', '0', 21.41, '00:14'),
+(10, 1914, '4', '0',  64.31, '00:38'),
+(8, 1712, '6', '2', 20.63, '00:14'),
+--(11, 2163, '7', '5', NULL, NULL),
+(12, 3967, '7', '0', 35.94, '00:22');

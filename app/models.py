@@ -215,3 +215,19 @@ class Routine(db.Model):
     frequency = db.Column(ARRAY(db.Enum(WeekDay)), nullable=False)
 
     transfers = db.relationship('Transfer', back_populates='routine', cascade='all, delete-orphan')
+
+class RigiRoute(db.Model):
+    __tablename__ = "rigi_routes"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    rigi_id = db.Column(db.Integer, nullable=False)
+
+    clinic_origin = db.Column(db.String, db.ForeignKey('clinics.id'), nullable=False)
+    clinic_destination = db.Column(db.String, db.ForeignKey('clinics.id'), nullable=False)
+
+    distance_km = db.Column(db.Numeric(10, 2))
+    flight_time_minutes = db.Column(db.String, nullable=False)
+
+    # Relationships to Clinic objects
+    origin_clinic = db.relationship("Clinic", foreign_keys=[clinic_origin])
+    destination_clinic = db.relationship("Clinic", foreign_keys=[clinic_destination])
