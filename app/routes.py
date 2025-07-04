@@ -137,6 +137,7 @@ def get_routes():
 
 @transfers_bp.route('/start-route', methods=['POST'])
 def start_route():
+    rigi_client.get_routes()
     data = request.get_json()
 
     if not data or 'route_id' not in data:
@@ -160,20 +161,19 @@ def start_route():
 
 
     current_clinic: Clinic = None
-    current_batch = []
     
     while ordered_transfers:
         transfer = ordered_transfers.pop(0)
 
-        transfers_batch = []
+        transfers_batch = [transfer]
         
-        while True:    
+        while ordered_transfers:    
             if ordered_transfers[0].clinic_id == transfer.clinic_id:
                 transfers_batch.append(ordered_transfers.pop(0))
             else:
                 break
          
-        origin_id = 0 # hospital central
+        origin_id = '0' # hospital central
         if current_clinic:
             origin_id = current_clinic.id
 
@@ -194,29 +194,55 @@ def start_route():
         op_payload = {
             "project": 51,
             "name": operation_name,
-            "scheduledTime": route.start_time,
+            "scheduledTime": route.scheduled_date_time,
             "route": rigi_route.rigi_id,
-            "payload": route.weight,
+            "payload": route.weight_at_depot / 1000, 
             "comments": "Test"
         }
 
-        rigi_operation = rigi_client.create_operation(op_payload)
+        rigi_operation_id = rigi_client.create_operation(op_payload)
+        if not rigi_operation_id:
+            return jsonify({"error": f"Error de comunicación con RigiTech"}), 502
+
         
         operation = Operation(
             id=str(uuid.uuid4()),
             route=route, # la ruta local
             status=OperationStatus.CREATED,
             estimated_time=rigi_route.flight_time_minutes,
-            rigi_operation_id=rigi_operation.id,
+            rigi_operation_id=rigi_operation_id,
             rigi_route_id=rigi_route.rigi_id,
             origin_clinic_id=origin_id,
             destination_clinic_id=destination_id
         )
 
-        operation.transfers = current_batch.copy()
+        operation.transfers = transfers_batch.copy()
         db.session.add(operation)
 
     route.status = RouteStatus.READY_FOR_START # lo actualiza ?
+
+    depot_op_payload = {
+        "project": 51,
+        "name": "Vuelta al Hospital Central",
+        "scheduledTime": route.scheduled_date_time,
+        "route": rigi_route.rigi_id,
+        "payload": route.weight_at_depot / 1000, 
+        "comments": "Test"
+    }
+
+    rigi_operation_id = rigi_client.create_operation(op_payload)
+
+    return_to_depot_operation = Operation(
+        id=str(uuid.uuid4()),
+        route=route, # la ruta local
+        status=OperationStatus.CREATED,
+        estimated_time=rigi_route.flight_time_minutes,
+        rigi_operation_id=rigi_operation_id,
+        rigi_route_id=rigi_route.rigi_id,
+        origin_clinic_id=origin_id,
+        destination_clinic_id=destination_id
+    )
+
     db.session.commit()
 
     return jsonify(route.to_dict()), 200

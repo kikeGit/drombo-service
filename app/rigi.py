@@ -166,6 +166,7 @@ class RestClient:
                 data = response.json()
                 print("✅ Success:")
                 print(json.dumps(data, indent=2))
+                return data["id"]
             else:
                 if response.status_code == 400:
                     error = response.json()

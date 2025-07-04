@@ -116,8 +116,8 @@ class Transfer(db.Model):
             "operation_id": self.operation_id,
             "weight": self.weight,
             "supplies": [s.to_dict() for s in self.supplies],
-            "estimated_arrival_date": self.estimated_arrival_date.isoformat(),
-            "estimated_arrival_time": self.estimated_arrival_time.isoformat(),
+            "estimated_arrival_date": self.estimated_arrival_date.isoformat() if self.estimated_arrival_date else None,
+            "estimated_arrival_time": self.estimated_arrival_time.isoformat() if self.estimated_arrival_time else None,
         }
 
 
@@ -160,15 +160,23 @@ class Route(db.Model):
     end_time = db.Column(db.String, nullable=False)
     routed_transfers_order = db.Column(db.String, nullable=False) # separado por comas
     start_times = db.Column(db.String, nullable=False) # separado por comas
-    status = db.Column(db.Enum(RouteStatus), nullable=False, default=RouteStatus.READY_FOR_START)
+    status = db.Column(db.Enum(RouteStatus), nullable=False, default=RouteStatus.TENTATIVE)
 
     transfers  = db.relationship('Transfer', back_populates='route', cascade='save-update, merge')
     operations = db.relationship('Operation', back_populates='route', cascade='all, delete-orphan')
 
     @property
-    def weight(self):
-        return sum(transfer.weight or 0 for transfer in self.transfers)
+    def weight_at_depot(self):
+        return sum(
+            transfer.weight or 0
+            for transfer in self.transfers
+            if transfer.type == TransferType.PEDIDO
+        )
     
+    @property
+    def scheduled_date_time(self):
+        return f"{self.date.isoformat()} {self.start_time}"
+         
     def to_dict(self):
         return {
             "id": self.id,
@@ -180,7 +188,7 @@ class Route(db.Model):
             "operation_ids": [op.id for op in self.operations],
             "status": self.status.value,
             "transfers": [transfer.to_dict() for transfer in self.transfers],
-            "weight": self.weight
+            "weight": self.weight_at_depot
         }
 
 

@@ -58,7 +58,7 @@ class Cronjob:
 
 
     def start(self):
-        self.scheduler.add_job(self.plan_routes, 'interval', minutes=1) # habria q poder configurarlo cada cuanto
+        self.scheduler.add_job(self.plan_routes, 'interval', minutes=5) # habria q poder configurarlo cada cuanto
         print("Start scheduler")
         self.scheduler.start()
         atexit.register(self.shutdown)
@@ -161,7 +161,7 @@ class Cronjob:
             print("Actualizo el transfer " + str(transfer.id))
             transfer.estimated_arrival_time = transfer_time
             transfer.estimated_arrival_date = route_date
-            transfer.status = TransferStatus.CONFIRMED
+            transfer.status = TransferStatus.CONFIRMED # 
 
     def create_routes(self, routes, routes_start_service, transfers, date):
         

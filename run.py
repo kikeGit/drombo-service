@@ -18,7 +18,8 @@ def main():
         
         # Start your cronjob system with access to app context
         scheduler = Cronjob(db, app)
-        scheduler.start()
+        scheduler.plan_routes()
+        #scheduler.start()
         #client = RestClient()
         #websocket = WebSocket()
         #client.get_simulator_list()
