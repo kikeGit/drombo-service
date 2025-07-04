@@ -142,6 +142,7 @@ class Supply(db.Model):
 
 
 class RouteStatus(enum.Enum):
+    TENTATIVE = "TENTATIVE"
     READY_FOR_START = "READY_FOR_START"
     IN_PROCESS = "IN_PROCESS"
     COMPLETED = "COMPLETED"
@@ -186,9 +187,11 @@ class Operation(db.Model):
 
     id = db.Column(db.String, primary_key=True)
     status = db.Column(db.Enum(OperationStatus), nullable=True, default=OperationStatus.CREATED)
-    estimated_time = db.Column(db.Time, nullable=False)
+    estimated_time = db.Column(db.String, nullable=False)
     actual_time = db.Column(db.Time, nullable=True)
-    rigitech_id = db.Column(db.String, nullable=False)
+    rigi_operation_id = db.Column(db.String, nullable=False)
+    rigi_route_id = db.Column(db.String, nullable=False)
+
 
     route_id = db.Column(db.String, db.ForeignKey('routes.id'), nullable=False)
     route = db.relationship('Route', back_populates='operations')

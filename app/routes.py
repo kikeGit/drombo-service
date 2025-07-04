@@ -1,13 +1,18 @@
 from flask import Blueprint, abort, jsonify, request
-from app.models import Clinic, Route, RouteStatus, Transfer
+from app.models import Clinic, Operation, OperationStatus, RigiRoute, Route, RouteStatus, Transfer
 from app import db
 import uuid
 from datetime import date, datetime, time
 from app.models import Transfer, Supply, TransferType, CompartmentSize, UrgencyLevel, TransferStatus
+from app.rigi import RestClient
 
 
 transfers_bp = Blueprint('transfers', __name__)
 main = Blueprint('main', __name__)
+
+
+rigi_client = RestClient()
+
 
 @main.route('/') 
 def index():
@@ -102,40 +107,126 @@ def delete_transfer(transfer_id):
 @transfers_bp.route('/routes', methods=['GET'])
 def get_routes():
     date_str = request.args.get("date")
+    status_str = request.args.get("status")
 
-    try:
-        if date_str:
+    filters = []
+
+    # Handle date filter
+    if date_str:
+        try:
             date = datetime.strptime(date_str, "%Y-%m-%d").date()
-            print(date)
-            routes = Route.query.filter(Route.date == date, Route.status == RouteStatus.READY_FOR_START).all()
-        else:
-            routes = Route.query.all()
-    
-    except ValueError:
-        return jsonify({"error": "Date format must be DD-MM-YYYY"}), 400
+            filters.append(Route.date == date)
+        except ValueError:
+            return jsonify({"error": "Date format must be YYYY-MM-DD"}), 400
+
+    # Handle status filter
+    if status_str:
+        # Validate status
+        try:
+            status_enum = RouteStatus[status_str]
+            filters.append(Route.status == status_enum)
+        except KeyError:
+            return jsonify({
+                "error": f"Invalid status '{status_str}'. Valid statuses are: {[s.name for s in RouteStatus]}"
+            }), 400
+
+    # Build query with optional filters
+    routes = Route.query.filter(*filters).all()
 
     return jsonify([route.to_dict() for route in routes]), 200
 
-# get_routes - return all routes 
+@transfers_bp.route('/start-route', methods=['POST'])
+def start_route():
+    data = request.get_json()
+
+    if not data or 'route_id' not in data:
+        return jsonify({"error": "Missing 'route_id' in request body"}), 400
+
+    route_id = data['route_id']
+    route: Route = Route.query.get(route_id)
+
+    if not route:
+        return jsonify({"error": f"Route with id {route_id} not found"}), 404
+
+    # Parse ordered transfer IDs
+    ordered_ids = route.routed_transfers_order.split(",")
+
+    # Load transfers in order
+    ordered_transfers = []
+    for transfer_id in ordered_ids:
+        transfer: Transfer = next((t for t in route.transfers if t.id == transfer_id), None) # for pirado
+        if transfer:
+            ordered_transfers.append(transfer)
+
+
+    current_clinic: Clinic = None
+    current_batch = []
+    
+    while ordered_transfers:
+        transfer = ordered_transfers.pop(0)
+
+        transfers_batch = []
+        
+        while True:    
+            if ordered_transfers[0].clinic_id == transfer.clinic_id:
+                transfers_batch.append(ordered_transfers.pop(0))
+            else:
+                break
+         
+        origin_id = 0 # hospital central
+        if current_clinic:
+            origin_id = current_clinic.id
+
+
+        destination_id = transfer.clinic_id
+        rigi_route: RigiRoute = (
+            RigiRoute.query
+            .filter(
+                RigiRoute.clinic_origin == origin_id,
+                RigiRoute.clinic_destination == destination_id
+            )
+            .first()
+        )
+
+        current_clinic = transfer.clinic
+        operation_name = f"{datetime.now()} {current_clinic.name}"
+        
+        op_payload = {
+            "project": 51,
+            "name": operation_name,
+            "scheduledTime": route.start_time,
+            "route": rigi_route.rigi_id,
+            "payload": route.weight,
+            "comments": "Test"
+        }
+
+        rigi_operation = rigi_client.create_operation(op_payload)
+        
+        operation = Operation(
+            id=str(uuid.uuid4()),
+            route=route, # la ruta local
+            status=OperationStatus.CREATED,
+            estimated_time=rigi_route.flight_time_minutes,
+            rigi_operation_id=rigi_operation.id,
+            rigi_route_id=rigi_route.rigi_id,
+            origin_clinic_id=origin_id,
+            destination_clinic_id=destination_id
+        )
+
+        operation.transfers = current_batch.copy()
+        db.session.add(operation)
+
+    route.status = RouteStatus.READY_FOR_START # lo actualiza ?
+    db.session.commit()
+
+    return jsonify(route.to_dict()), 200
+
 
 # get_clinics - return all clinics
 @transfers_bp.route('/clinics', methods=['GET'])
 def get_clinics():
     clinics = Clinic.query.all()
     return jsonify([clinic.to_dict() for clinic in clinics]), 200
-
-
-# postpone_route - TBD
-
-# send_route_to_rigitech (BLOQUEADO POR FRANCO)
-
-
-## CRONJOBS
-
-# recalculate_routes - Every 5 minutes
-# update_transfer_status - Once per day
-# create_routin_transfers - Once per week 
-
 
 
 REQUIRED_TRANSFER_FIELDS = [

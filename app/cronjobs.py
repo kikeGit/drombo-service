@@ -85,7 +85,7 @@ class Cronjob:
 
         self.db.session.commit()
 
-        routes = Route.query.filter(Route.status == RouteStatus.READY_FOR_START).all()
+        routes = Route.query.filter(Route.status == RouteStatus.TENTATIVE).all()
         for route in routes:
             self.db.session.delete(route)
 
@@ -189,7 +189,7 @@ class Cronjob:
                 routed_transfers_order=route_transfers_order,
                 transfers=route_transfers,
                 start_times=start_times_order,
-                status=RouteStatus.READY_FOR_START
+                status=RouteStatus.TENTATIVE
             )
             
             self.session.add(db_route)
