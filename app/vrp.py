@@ -12,7 +12,7 @@ alfa_1 = 1/3
 alfa_2 = 1/3
 alfa_3 = 1/3
 
-distance_normalizer = 3
+distance_normalizer = 1
 time_window_normalizer = 24
 
 pedido = 'pedido'

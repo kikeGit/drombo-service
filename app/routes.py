@@ -131,7 +131,7 @@ def get_routes():
             }), 400
 
     # Build query with optional filters
-    routes = Route.query.filter(*filters).all()
+    routes: Route = Route.query.filter(*filters).all()
 
     return jsonify([route.to_dict() for route in routes]), 200
 
@@ -161,6 +161,7 @@ def start_route():
 
 
     current_clinic: Clinic = None
+    last_transfer = None
     
     while ordered_transfers:
         transfer = ordered_transfers.pop(0)
@@ -169,7 +170,7 @@ def start_route():
         
         while ordered_transfers:    
             if ordered_transfers[0].clinic_id == transfer.clinic_id:
-                transfers_batch.append(ordered_transfers.pop(0))
+                transfers_batch.append(ordered_transfers.pop(0)) # t1, t2,
             else:
                 break
          
@@ -188,15 +189,23 @@ def start_route():
             .first()
         )
 
+        if last_transfer:
+            s_date = route.date.isoformat()
+            s_time = number_to_time(time_to_number(last_transfer.estimated_arrival_time) + current_clinic.average_wait_time)
+            schedule_time = f"{s_date} {s_time}"
+        else:
+            schedule_time = route.scheduled_date_time
+        
+        last_transfer = transfers_batch[-1]
         current_clinic = transfer.clinic
         operation_name = f"{datetime.now()} {current_clinic.name}"
-        
+
         op_payload = {
             "project": 51,
             "name": operation_name,
-            "scheduledTime": route.scheduled_date_time,
+            "scheduledTime": schedule_time,
             "route": rigi_route.rigi_id,
-            "payload": route.weight_at_depot / 1000, 
+            #"payload": route.weight_at_depot / 1000, 
             "comments": "Test"
         }
 
@@ -213,7 +222,8 @@ def start_route():
             rigi_operation_id=rigi_operation_id,
             rigi_route_id=rigi_route.rigi_id,
             origin_clinic_id=origin_id,
-            destination_clinic_id=destination_id
+            destination_clinic_id=destination_id,
+            scheduled_time = schedule_time
         )
 
         operation.transfers = transfers_batch.copy()
@@ -221,28 +231,46 @@ def start_route():
 
     route.status = RouteStatus.READY_FOR_START # lo actualiza ?
 
+    depot_route: RigiRoute = (
+        RigiRoute.query
+        .filter(
+            RigiRoute.clinic_origin == destination_id, # trampita, el valor de destination_id se puede usar como origin en la proxima operacion
+            RigiRoute.clinic_destination == '0'
+        )
+        .first()
+    )
+
+    if last_transfer:
+        s_date = route.date.isoformat()
+        s_time = number_to_time(time_to_number(last_transfer.estimated_arrival_time) + current_clinic.average_wait_time)
+        schedule_time = f"{s_date} {s_time}"
+    else:
+        schedule_time = route.scheduled_date_time
+
     depot_op_payload = {
         "project": 51,
         "name": "Vuelta al Hospital Central",
-        "scheduledTime": route.scheduled_date_time,
+        "scheduledTime": schedule_time,
         "route": rigi_route.rigi_id,
-        "payload": route.weight_at_depot / 1000, 
-        "comments": "Test"
+        #"payload": route.weight_at_depot / 1000, 
+        "comments": "Depot"
     }
 
-    rigi_operation_id = rigi_client.create_operation(op_payload)
+    rigi_operation_id = rigi_client.create_operation(depot_op_payload)
 
     return_to_depot_operation = Operation(
         id=str(uuid.uuid4()),
         route=route, # la ruta local
         status=OperationStatus.CREATED,
-        estimated_time=rigi_route.flight_time_minutes,
+        estimated_time=depot_route.flight_time_minutes,
         rigi_operation_id=rigi_operation_id,
-        rigi_route_id=rigi_route.rigi_id,
-        origin_clinic_id=origin_id,
-        destination_clinic_id=destination_id
+        rigi_route_id=depot_route.rigi_id,
+        origin_clinic_id=destination_id, # trampita, el valor de destination_id se puede usar como origin en la proxima operacion
+        destination_clinic_id='0',
+        scheduled_time = schedule_time
     )
-
+        
+    db.session.add(return_to_depot_operation)
     db.session.commit()
 
     return jsonify(route.to_dict()), 200
@@ -276,3 +304,16 @@ def validate_transfer_data(data):
         missing_supply_fields = [field for field in REQUIRED_SUPPLY_FIELDS if supply.get(field) is None]
         if missing_supply_fields:
             abort(400, description=f"Supply {i + 1} is missing required fields: {', '.join(missing_supply_fields)}")
+
+def time_to_number(time_to_ask):
+    hora_str = time_to_ask
+    if isinstance(time_to_ask, time):
+        hora_str = time_to_ask.strftime("%H:%M")
+    
+    hours, minutes = map(int, hora_str.split(":"))
+    return hours + minutes / 60
+
+def number_to_time(num):
+    hours = int(num)
+    minutes = round((num - hours) * 60)
+    return f"{hours:02d}:{minutes:02d}"

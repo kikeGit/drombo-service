@@ -169,7 +169,7 @@ class Cronjob:
             route_transfers_order = ",".join(node.delivery_name for node in route)
             
             transfers_ids = [node.delivery_name for node in route] # ids de la ruta
-            start_times = routes_start_service[route_index]
+            start_times = routes_start_service[route_index] # 
             
             start_times_order = ",".join(self.number_to_time(start_time) for start_time in start_times)
             

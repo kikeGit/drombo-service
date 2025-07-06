@@ -201,6 +201,7 @@ class Operation(db.Model):
     actual_time = db.Column(db.Time, nullable=True)
     rigi_operation_id = db.Column(db.String, nullable=False)
     rigi_route_id = db.Column(db.String, nullable=False)
+    scheduled_time = db.Column(db.String, nullable=False)
 
 
     route_id = db.Column(db.String, db.ForeignKey('routes.id'), nullable=False)

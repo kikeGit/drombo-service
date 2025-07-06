@@ -4,6 +4,9 @@ from app.vrp import Node, VRPTW_MultipleDeliveries
 import copy
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
+from app.models import Clinic, RigiRoute
+from app.routes import time_to_number
+
 
 distances_50x50 = [
     [0.0, 2.96, 2.05, 2.99, 2.77, 2.05, 1.11, 1.39, 1.44, 2.04, 2.23, 1.49, 0.83, 2.65, 2.31, 0.68, 2.92, 2.33, 1.17, 1.84, 1.42, 2.51, 1.44, 1.9, 2.48, 2.82, 2.44, 1.67, 2.16, 0.94, 2.65, 2.63, 2.82, 1.21, 0.56, 1.54, 1.83, 2.46, 0.91, 0.66, 2.98, 1.01, 2.69, 1.28, 2.37, 0.91, 1.49, 1.25, 0.55, 2.19],
@@ -58,6 +61,34 @@ distances_50x50 = [
     [2.19, 0.86, 1.17, 0.87, 2.09, 1.81, 1.22, 0.88, 1.24, 2.42, 2.93, 2.76, 0.79, 1.63, 2.14, 2.32, 2.01, 1.35, 2.66, 1.88, 1.15, 0.82, 2.34, 1.98, 0.77, 2.98, 0.65, 0.76, 2.92, 2.38, 2.41, 2.52, 1.32, 1.75, 2.13, 1.75, 1.77, 2.26, 2.18, 2.5, 0.66, 2.19, 1.59, 2.16, 2.39, 1.41, 0.84, 2.21, 1.6, 0.0],
 ]
 
+def build_flight_time_matrix():
+
+    count_clinics = Clinic.query.count() # las polis siempre tienen ids continuos ;)
+    routes = RigiRoute.query.all()
+    matrix = [
+        [
+            0.0 if i == j else float('inf') 
+            for j in range(count_clinics)
+        ] 
+        for i in range(count_clinics)
+    ]
+
+    # Rellenar la matriz con los flight_time_minutes
+    for route in routes:
+        origin_idx = int(route.clinic_origin)
+        dest_idx = int(route.clinic_destination)    
+
+        try:
+            value = float(time_to_number(route.flight_time_minutes))
+        except (ValueError, TypeError):
+            print("error crack")
+            value = float('inf')
+
+        matrix[dest_idx][origin_idx] = value
+
+    return matrix
+
+
 zero = 0
 max_vehicles = 1
 vehicle_capacity = 3000
@@ -71,7 +102,8 @@ envio = 'envio'
 def make_daily_routing(urgent_deliveries, normal_deliveries, low_deliveries, custom_depot):
     depot = Node(0, 0, (0, 20), 0, 'Depot', None, None) # si anda dejalo
 
-    varp = VRPTW_MultipleDeliveries(depot, distances_50x50, vehicle_capacity, max_vehicles)
+    distance_matrix = build_flight_time_matrix()
+    varp = VRPTW_MultipleDeliveries(depot, distance_matrix, vehicle_capacity, max_vehicles)
     routes: List[List[Node]] = []
     routes_start_services: List[List[Node]] = []
     impossible_nodes = []
@@ -93,7 +125,9 @@ def make_daily_routing(urgent_deliveries, normal_deliveries, low_deliveries, cus
             break # no pude rutear nada mas
 
         if route_length > 1: # mariana: mayor claridad
-            final_depot = copy.deepcopy(route[len(route) - 1])
+            final_depot: Node = copy.deepcopy(route[len(route) - 1])
+
+            final_depot.time_window= (final_depot.get_start_time_window() + time_to_number('00:30'), final_depot.get_end_time_window()) # cooldown todo: cambiarlo a una config
             routes.append(route)
             routes_start_services.append(start_service)
                 
@@ -105,7 +139,9 @@ def make_daily_routing(urgent_deliveries, normal_deliveries, low_deliveries, cus
 def make_multiple_day_routing(urgent_deliveries, normal_deliveries, low_deliveries, custom_depot):
     depot = Node(0, 0, (0, 20), 0, 'Depot', None, None)
 
-    varp = VRPTW_MultipleDeliveries(depot, distances_50x50, vehicle_capacity, max_vehicles)
+    distance_matrix = build_flight_time_matrix()
+
+    varp = VRPTW_MultipleDeliveries(depot, distance_matrix, vehicle_capacity, max_vehicles)
     routes: List[List[Node]] = []
     routes_start_services: List[List[Node]] = []
     routes_by_day = {}
