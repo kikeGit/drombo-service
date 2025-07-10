@@ -18,9 +18,10 @@ def main():
         print("✅ Tables created.")
         
         # Start your cronjob system with access to app context
-        scheduler = Cronjob(db, app)
+        matrix = build_flight_time_matrix()
+        print(matrix)
+        scheduler = Cronjob(db, app, matrix)
         scheduler.plan_routes()
-        print(build_flight_time_matrix())
         #scheduler.start()
         #client = RestClient()
         #websocket = WebSocket()

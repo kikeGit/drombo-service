@@ -99,10 +99,10 @@ depot_time = (0, 20)
 pedido = 'pedido'
 envio = 'envio'
 
-def make_daily_routing(urgent_deliveries, normal_deliveries, low_deliveries, custom_depot):
+def make_daily_routing(urgent_deliveries, normal_deliveries, low_deliveries, custom_depot, distance_matrix):
     depot = Node(0, 0, (0, 20), 0, 'Depot', None, None) # si anda dejalo
 
-    distance_matrix = build_flight_time_matrix()
+    #distance_matrix = build_flight_time_matrix()
     varp = VRPTW_MultipleDeliveries(depot, distance_matrix, vehicle_capacity, max_vehicles)
     routes: List[List[Node]] = []
     routes_start_services: List[List[Node]] = []
@@ -136,10 +136,10 @@ def make_daily_routing(urgent_deliveries, normal_deliveries, low_deliveries, cus
 
     return routes, routes_start_services, impossible_nodes 
 
-def make_multiple_day_routing(urgent_deliveries, normal_deliveries, low_deliveries, custom_depot):
+def make_multiple_day_routing(urgent_deliveries, normal_deliveries, low_deliveries, custom_depot, distance_matrix):
     depot = Node(0, 0, (0, 20), 0, 'Depot', None, None)
 
-    distance_matrix = build_flight_time_matrix()
+    #distance_matrix = build_flight_time_matrix()
 
     varp = VRPTW_MultipleDeliveries(depot, distance_matrix, vehicle_capacity, max_vehicles)
     routes: List[List[Node]] = []

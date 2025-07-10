@@ -13,8 +13,8 @@ class UrgencyLevel(enum.Enum):
     HIGH = "alta"
 
 class TransferType(enum.Enum):
-    PEDIDO = "pedido"
-    ENVIO = "envio"
+    PEDIDO = "Pedido"
+    ENVIO = "Envio"
 
 class TransferStatus(enum.Enum):
     PENDING = "pendiente"

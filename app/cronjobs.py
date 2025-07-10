@@ -25,11 +25,12 @@ class Cronjob:
     
     distance_matrix = []
 
-    def __init__(self, db, app):
+    def __init__(self, db, app, matrix):
         self.db = db
         self.session = self.db.session
         self.app = app
         self.days = 5
+        self.matrix = matrix
 
         self.scheduler = BackgroundScheduler()
         self.scheduler.add_listener(self.log_scheduler_events, EVENT_SCHEDULER_STARTED | EVENT_SCHEDULER_SHUTDOWN | EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
@@ -68,7 +69,7 @@ class Cronjob:
             self.logger.info("Borrando rutas viejas y preparando traslados")
             self.delete_ready_routes()
             self.logger.info("Calculando nuevas rutas")
-            self.recalculate_routes(self.days)
+            self.recalculate_routes(self.days, self.matrix)
         
     def print_transfer(self, transfer):
         supply_ids = [s.id for s in transfer.supplies] if transfer.supplies else []
@@ -196,7 +197,7 @@ class Cronjob:
         self.session.commit()
 
     # Ejemplo: se ejecuta cada 5 minutos
-    def recalculate_routes(self, days=5):
+    def recalculate_routes(self, days=5, matrix=None):
         today = datetime.today()
         
         for i in range(days):
@@ -228,7 +229,7 @@ class Cronjob:
                 if t.urgency == UrgencyLevel.LOW:
                     low_deliveries.append(delivery_node)
 
-            routes, routes_start_services, impossible_nodes = make_routing.make_daily_routing(urgent_deliveries, normal_deliveries, low_deliveries, depot)
+            routes, routes_start_services, impossible_nodes = make_routing.make_daily_routing(urgent_deliveries, normal_deliveries, low_deliveries, depot, matrix)
 
             self.create_routes(routes, routes_start_services, transfers, new_date)
             self.cancel_transfers(impossible_nodes)
