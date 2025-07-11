@@ -24,21 +24,31 @@ INSERT INTO transfers (
     start_time, end_time, compartment, urgency, status,
     clinic_id
 ) VALUES
-('t1', 'ENVIO', '2025-07-08', 'Dr. A', '2025-07-05', '2025-08-08', '10:00:00', '13:00:00', 'SMALL', 'LOW', 'PENDING', '1'),
+('t1', 'ENVIO', '2025-07-08', 'Alex Romero', '2025-07-05', '2025-08-08', '10:00:00', '13:00:00', 'SMALL', 'LOW', 'PENDING', '1'),
 ('t2', 'PEDIDO', '2025-07-08', 'Dr. B', '2025-07-05', '2025-08-08', '11:30:00', '18:30:00', 'MEDIUM', 'MEDIUM', 'PENDING', '2'),
 ('t3', 'ENVIO', '2025-07-08', 'Dr. C', '2025-07-05', '2025-08-08', '09:00:00', '13:00:00', 'LARGE', 'HIGH', 'PENDING', '3'),
 ('t4', 'PEDIDO', '2025-07-08', 'Dr. D', '2025-07-05', '2025-08-08', '15:00:00', '17:00:00', 'SMALL', 'LOW', 'PENDING', '4'),
 ('t5', 'ENVIO', '2025-06-16', 'Dr. E', '2025-07-05', '2025-08-08', '14:00:00', '16:00:00', 'MEDIUM', 'MEDIUM', 'PENDING', '2'),
 ('t6', 'ENVIO', '2025-06-17', 'Dr. F', '2025-07-05', '2025-08-08', '08:00:00', '12:00:00', 'SMALL', 'LOW', 'PENDING', '5'),
 ('t7', 'PEDIDO', '2025-06-17', 'Dr. G', '2025-07-05', '2025-08-08', '10:30:00', '17:30:00', 'MEDIUM', 'MEDIUM', 'PENDING', '6'),
-('t8', 'ENVIO', '2025-06-17', 'Dr. H', '2025-07-03', '2025-08-08', '09:30:00', '15:00:00', 'LARGE', 'HIGH', 'PENDING', '1'),
+('t8', 'ENVIO', '2025-06-17', 'Julieta Sosa', '2025-07-03', '2025-08-08', '09:30:00', '15:00:00', 'LARGE', 'HIGH', 'PENDING', '1'),
 ('t9', 'PEDIDO', '2025-06-18', 'Dr. I', '2025-07-03', '2025-08-08', '14:00:00', '18:00:00', 'SMALL', 'LOW', 'PENDING', '3'),
 ('t10', 'ENVIO', '2025-06-18', 'Dr. J', '2025-07-05', '2025-08-08', '13:00:00', '16:00:00', 'MEDIUM', 'MEDIUM', 'PENDING', '4'),
 ('t11', 'ENVIO', '2025-06-18', 'Dr. K', '2025-07-05', '2025-08-08', '08:00:00', '11:00:00', 'SMALL', 'LOW', 'PENDING', '2'),
 ('t12', 'PEDIDO', '2025-06-19', 'Dr. L', '2025-07-05', '2025-08-08', '09:00:00', '12:00:00', 'MEDIUM', 'HIGH', 'PENDING', '3'),
 ('t13', 'ENVIO', '2025-06-19', 'Dr. M', '2025-07-04', '2025-08-08', '10:00:00', '14:00:00', 'LARGE', 'HIGH', 'PENDING', '4'),
 ('t14', 'PEDIDO', '2025-06-20', 'Dr. N', '2025-07-03', '2025-08-08', '13:00:00', '16:00:00', 'MEDIUM', 'LOW', 'PENDING', '5'),
-('t15', 'ENVIO', '2025-06-20', 'Dr. O', '2025-07-04', '2025-08-08', '14:00:00', '17:00:00', 'SMALL', 'MEDIUM', 'PENDING', '6');
+('t15', 'ENVIO', '2025-06-20', 'Dr. O', '2025-07-04', '2025-08-08', '14:00:00', '17:00:00', 'SMALL', 'MEDIUM', 'PENDING', '6'),
+('t16', 'PEDIDO', '2025-06-20', 'Dr. O', '2025-07-04', '2025-07-05', '14:00:00', '17:00:00', 'LARGE', 'HIGH', 'DELIVERED', '2'),
+('t18', 'ENVIO', '2025-06-20', 'Dr. O', '2025-07-04', '2025-07-08', '14:00:00', '17:00:00', 'SMALL', 'MEDIUM', 'REJECTED', '4'),
+('t19', 'PEDIDO', '2025-06-20', 'Camila Castro', '2025-07-03', '2025-07-08', '13:00:00', '16:00:00', 'MEDIUM', 'LOW', 'REJECTED', '1');
+
+INSERT INTO transfers (
+    id, type, request_date, requester, start_date, end_date,
+    start_time, end_time, compartment, urgency, status,
+    clinic_id, estimated_arrival_date
+) VALUES
+('t17', 'ENVIO', '2025-06-20', 'Omar Villadeamigo', '2025-07-04', '2025-07-08', '14:00:00', '17:00:00', 'SMALL', 'MEDIUM', 'DELIVERED', '1', '2025-07-05');
 
 
 INSERT INTO supplies (id, name, weight, quantity, notes, transfer_id) VALUES

@@ -1,6 +1,6 @@
 from flask import Blueprint, abort, jsonify, request
 from app.models import Clinic, Operation, OperationStatus, RigiRoute, Route, RouteStatus, Transfer
-from app import db
+from app.db import db
 import uuid
 from datetime import date, datetime, time
 from app.models import Transfer, Supply, TransferType, CompartmentSize, UrgencyLevel, TransferStatus

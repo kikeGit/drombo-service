@@ -21,7 +21,7 @@ class TransferStatus(enum.Enum):
     CONFIRMED = "confirmado"
     ON_ROUTE = "en camino"
     REJECTED = "rechazado"
-    DELIVERIED = "entregado"
+    DELIVERED = "entregado"
 
 class WeekDay(enum.Enum):
     MONDAY = "monday"
