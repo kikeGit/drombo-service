@@ -17,10 +17,11 @@ class TransferType(enum.Enum):
     ENVIO = "Envio"
 
 class TransferStatus(enum.Enum):
-    PENDING = "pendiente"
-    CONFIRMED = "confirmado"
-    ON_ROUTE = "en camino"
-    REJECTED = "rechazado"
+    PENDING = "pendiente" # pendiente de ruteo
+    PLANNED = "planificado" # 
+    CONFIRMED = "confirmado" # enviado a rigitec
+    ON_ROUTE = "en camino" # en progreso
+    REJECTED = "rechazado" # rechazado / incidente
     DELIVERED = "entregado"
 
 class WeekDay(enum.Enum):

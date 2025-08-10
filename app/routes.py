@@ -1,8 +1,11 @@
+import logging
+import threading
 from flask import Blueprint, abort, jsonify, request
 from app.models import Clinic, Operation, OperationStatus, RigiRoute, Route, RouteStatus, Transfer
 from app.db import db
 import uuid
-from datetime import date, datetime, time
+import time as time_god
+from datetime import date, datetime, time, timedelta, timezone
 from app.models import Transfer, Supply, TransferType, CompartmentSize, UrgencyLevel, TransferStatus
 from app.rigi import RestClient
 
@@ -131,13 +134,18 @@ def get_routes():
             }), 400
 
     # Build query with optional filters
-    routes: Route = Route.query.filter(*filters).all()
+    #ordenar
+    routes = (Route.query
+        .filter(*filters)
+        .order_by(Route.date.asc(), Route.start_time.asc())
+        .all()
+    )
 
     return jsonify([route.to_dict() for route in routes]), 200
 
 @transfers_bp.route('/start-route', methods=['POST'])
 def start_route():
-    rigi_client.get_routes()
+    #rigi_client.get_routes()
     data = request.get_json()
 
     if not data or 'route_id' not in data:
@@ -145,6 +153,8 @@ def start_route():
 
     route_id = data['route_id']
     route: Route = Route.query.get(route_id)
+    logging.info(f'route_id: {route_id}')
+
 
     if not route:
         return jsonify({"error": f"Route with id {route_id} not found"}), 404
@@ -163,6 +173,11 @@ def start_route():
     current_clinic: Clinic = None
     last_transfer = None
     
+    dron_id = 42 # dron 152, simulator 105, 42
+    battery_id = 'CIE-ER-02-042'
+    pilot_id = 3000086
+    mari_id = 3000080
+
     while ordered_transfers:
         transfer = ordered_transfers.pop(0)
 
@@ -190,30 +205,62 @@ def start_route():
         )
 
         if last_transfer:
-            s_date = route.date.isoformat()
             s_time = number_to_time(time_to_number(last_transfer.estimated_arrival_time) + current_clinic.average_wait_time)
-            schedule_time = f"{s_date} {s_time}"
+            # 1. Convert s_time ("HH:MM") to datetime.time
+            hours, minutes = map(int, s_time.split(":"))
+            s_time_obj = time(hour=hours, minute=minutes)
+
+            # 2. Combine date and time
+            naive_dt = datetime.combine(route.date, s_time_obj)
+            # If it's actually in local time (e.g., UTC−3), use:
+            # from datetime import timedelta
+            local_dt = naive_dt.replace(tzinfo=timezone(timedelta(hours=-3)))
+            utc_dt = local_dt.astimezone(timezone.utc)
+            # 4. Format final schedule_time
+            schedule_time = utc_dt.strftime("%Y-%m-%d %H:%M")
         else:
-            schedule_time = route.scheduled_date_time
+            # Parse string into naive datetime
+            naive_dt = datetime.strptime(route.scheduled_date_time, "%Y-%m-%d %H:%M")
+
+            # Localize to UTC−3
+            local_dt = naive_dt.replace(tzinfo=timezone(timedelta(hours=-3)))
+
+            # Convert to UTC
+            utc_dt = local_dt.astimezone(timezone.utc)
+
+            # Format the final UTC string
+            schedule_time = utc_dt.strftime("%Y-%m-%d %H:%M")
         
         last_transfer = transfers_batch[-1]
         current_clinic = transfer.clinic
-        operation_name = f"{datetime.now()} {current_clinic.name}"
+        operation_name = f"DROMBO - Vuelo a {current_clinic.name}"
 
+        schedule_time = '2025-07-27 18:44'
         op_payload = {
             "project": 51,
             "name": operation_name,
             "scheduledTime": schedule_time,
             "route": rigi_route.rigi_id,
-            #"payload": route.weight_at_depot / 1000, 
+            "payload": route.weight_at_depot / 1000,
+            #"drone": dron_id,
+            "batteries": [battery_id],
+            "pic": pilot_id,
+            "groundOperators": [mari_id],
             "comments": "Test"
         }
 
+        logging.info(f"operation payload: {op_payload}")
+
         rigi_operation_id = rigi_client.create_operation(op_payload)
+        if not rigi_operation_id:
+            return jsonify({"error": "Error al crear operación de retorno al depósito"}), 502
+        
+        time_god.sleep(1)
+        logging.info(f"rigi_operation_id: {rigi_operation_id}")
+
         if not rigi_operation_id:
             return jsonify({"error": f"Error de comunicación con RigiTech"}), 502
 
-        
         operation = Operation(
             id=str(uuid.uuid4()),
             route=route, # la ruta local
@@ -241,22 +288,53 @@ def start_route():
     )
 
     if last_transfer:
-        s_date = route.date.isoformat()
         s_time = number_to_time(time_to_number(last_transfer.estimated_arrival_time) + current_clinic.average_wait_time)
-        schedule_time = f"{s_date} {s_time}"
-    else:
-        schedule_time = route.scheduled_date_time
+        # 1. Convert s_time ("HH:MM") to datetime.time
+        hours, minutes = map(int, s_time.split(":"))
+        s_time_obj = time(hour=hours, minute=minutes)
 
+        # 2. Combine date and time
+        naive_dt = datetime.combine(route.date, s_time_obj)
+        # If it's actually in local time (e.g., UTC−3), use:
+        # from datetime import timedelta
+        local_dt = naive_dt.replace(tzinfo=timezone(timedelta(hours=-3)))
+        utc_dt = local_dt.astimezone(timezone.utc)
+        # 4. Format final schedule_time
+        schedule_time = utc_dt.strftime("%Y-%m-%d %H:%M")
+    else:
+        # Parse string into naive datetime
+        naive_dt = datetime.strptime(route.scheduled_date_time, "%Y-%m-%d %H:%M")
+
+        # Localize to UTC−3
+        local_dt = naive_dt.replace(tzinfo=timezone(timedelta(hours=-3)))
+
+        # Convert to UTC
+        utc_dt = local_dt.astimezone(timezone.utc)
+
+        # Format the final UTC string
+        schedule_time = utc_dt.strftime("%Y-%m-%d %H:%M")
+
+    name = f"DROMBO - Vuelta al Hospital Central"
+    schedule_time = '2025-07-27 18:44'
     depot_op_payload = {
         "project": 51,
-        "name": "Vuelta al Hospital Central",
+        "name": name,
         "scheduledTime": schedule_time,
-        "route": rigi_route.rigi_id,
-        #"payload": route.weight_at_depot / 1000, 
+        "route": depot_route.rigi_id,
+        "payload": route.weight_at_depot / 1000,
+        #"drone": dron_id,
+        "batteries": [battery_id],
+        "pic": pilot_id,
+        "groundOperators": [mari_id],
         "comments": "Depot"
     }
 
+    logging.info(f"depot operation payload: {depot_op_payload}")    
     rigi_operation_id = rigi_client.create_operation(depot_op_payload)
+    if not rigi_operation_id:
+        return jsonify({"error": "Error al crear operación de retorno al depósito"}), 502
+
+    logging.info(f"depot rigi_operation_id: {rigi_operation_id}")
 
     return_to_depot_operation = Operation(
         id=str(uuid.uuid4()),
@@ -264,12 +342,17 @@ def start_route():
         status=OperationStatus.CREATED,
         estimated_time=depot_route.flight_time_minutes,
         rigi_operation_id=rigi_operation_id,
+        
         rigi_route_id=depot_route.rigi_id,
+
         origin_clinic_id=destination_id, # trampita, el valor de destination_id se puede usar como origin en la proxima operacion
         destination_clinic_id='0',
         scheduled_time = schedule_time
     )
-        
+    
+    for transfer in route.transfers:
+        transfer.status = TransferStatus.CONFIRMED
+
     db.session.add(return_to_depot_operation)
     db.session.commit()
 

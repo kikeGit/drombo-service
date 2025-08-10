@@ -7,7 +7,7 @@ from datetime import datetime
 from sqlalchemy import delete
 
 from app import make_routing
-from app.models import Route, RouteStatus, Transfer, TransferStatus, UrgencyLevel
+from app.models import OperationStatus, Route, RouteStatus, Transfer, TransferStatus, UrgencyLevel
 from sqlalchemy import and_, func, or_
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import update
@@ -19,6 +19,7 @@ import atexit
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.events import EVENT_SCHEDULER_STARTED, EVENT_SCHEDULER_SHUTDOWN, EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 
+from app.rigi import RestClient, WebSocket
 
 
 class Cronjob:
@@ -29,8 +30,9 @@ class Cronjob:
         self.db = db
         self.session = self.db.session
         self.app = app
-        self.days = 5
+        self.days = 7
         self.matrix = matrix
+        self.client = RestClient()
 
         self.scheduler = BackgroundScheduler()
         self.scheduler.add_listener(self.log_scheduler_events, EVENT_SCHEDULER_STARTED | EVENT_SCHEDULER_SHUTDOWN | EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
@@ -59,7 +61,8 @@ class Cronjob:
 
 
     def start(self):
-        self.scheduler.add_job(self.plan_routes, 'interval', minutes=5) # habria q poder configurarlo cada cuanto
+        self.scheduler.add_job(self.plan_routes, 'interval', minutes=1) # habria q poder configurarlo cada cuanto
+        self.scheduler.add_job(self.check_operation_statuses, 'interval', minutes=0.5) # habria q poder configurarlo cada cuanto
         print("Start scheduler")
         self.scheduler.start()
         atexit.register(self.shutdown)
@@ -69,17 +72,120 @@ class Cronjob:
             self.logger.info("Borrando rutas viejas y preparando traslados")
             self.delete_ready_routes()
             self.logger.info("Calculando nuevas rutas")
+            now = datetime.now()
             self.recalculate_routes(self.days, self.matrix)
-        
+            after = datetime.now()
+            diff = after - now
+            print("Tiempo de planificación: " + str(diff.total_seconds()))     
+
+    def check_operation_statuses(self):
+        with self.app.app_context():
+            self.logger.info("Consultando el estado de las operaciones en RigiTech")
+
+            # Mapear estados de RigiTech → nuestros OperationStatus
+            rigi_status_map = {
+                1: OperationStatus.CREATED,      # Scheduled
+                2: OperationStatus.IN_PROGRES,   # In progress
+                3: OperationStatus.COMPLETED,    # Delivered
+                4: OperationStatus.ABORTED       # Incident
+            }
+            operation_to_transfer_status_map = {
+                OperationStatus.CREATED: TransferStatus.PENDING,
+                OperationStatus.IN_PROGRES: TransferStatus.ON_ROUTE,
+                OperationStatus.COMPLETED: TransferStatus.DELIVERED,
+                OperationStatus.ABORTED: TransferStatus.REJECTED,
+            }
+
+            # Buscar rutas en READY_FOR_START o IN_PROCESS
+            routes = Route.query.filter(
+                or_(
+                    Route.status == RouteStatus.READY_FOR_START,
+                    Route.status == RouteStatus.IN_PROCESS
+                )
+            ).all()
+
+            for route in routes:
+                route_changed = False
+                all_completed = True
+                any_in_progress = False
+
+                for operation in route.operations:
+                    try:
+                        self.logger.info(f"Consultando operacion {operation.id}")
+                        op_data = self.client.get_operation_by_id(operation.rigi_operation_id)
+                        #self.logger.info(op_data)
+                        rigi_status_int = op_data.get("status")
+                        self.logger.info(f"status: {rigi_status_int}")
+
+
+                        if rigi_status_int not in rigi_status_map:
+                            self.logger.warning(f"Estado {rigi_status_int} no reconocido para operación {operation.id}")
+                            continue
+
+                        new_status = rigi_status_map[rigi_status_int]
+
+                        # Si el estado cambió, actualizar
+                        if operation.status != new_status:
+                            self.logger.info(f"Actualizando operación {operation.id} de {operation.status} → {new_status}")
+                            operation.status = new_status
+                            route_changed = True
+
+                            # Actualizar estado de los transfers asociados
+                            new_transfer_status = operation_to_transfer_status_map.get(new_status)
+                            if new_transfer_status:
+                                
+                                for transfer in operation.transfers:
+                                    if transfer.status != new_transfer_status:
+                                        self.logger.info(f"  Actualizando transfer {transfer.id} de {transfer.status} → {new_transfer_status}")
+                                        transfer.status = new_transfer_status
+                                        self.db.session.add(transfer)
+
+                        # Verificar flags para la ruta
+                        if new_status == OperationStatus.IN_PROGRES:
+                            any_in_progress = True
+                            all_completed = False
+                        elif new_status != OperationStatus.COMPLETED:
+                            all_completed = False
+
+                    except Exception as e:
+                        self.logger.error(f"Error consultando operación {operation.id}: {e}")
+                        all_completed = False
+
+                # Actualizar estado de la ruta según operaciones
+                if any_in_progress and route.status != RouteStatus.IN_PROCESS:
+                    self.logger.info(f"Ruta {route.id} cambiando a IN_PROCESS")
+                    route.status = RouteStatus.IN_PROCESS
+                    route_changed = True
+
+                if all_completed and route.status != RouteStatus.COMPLETED:
+                    self.logger.info(f"Ruta {route.id} cambiando a COMPLETED")
+                    route.status = RouteStatus.COMPLETED
+                    route_changed = True
+
+                    # Marcar todos los transfers como DELIVERED
+                    for transfer in route.transfers:
+                        transfer.status = TransferStatus.DELIVERED
+
+                if route_changed:
+                    self.db.session.add(route)
+
+            self.db.session.commit()
+
     def print_transfer(self, transfer):
         supply_ids = [s.id for s in transfer.supplies] if transfer.supplies else []
         print(f"[{transfer.id}] {transfer.status.name} | {transfer.start_date} → {transfer.end_date} | Clinic: {transfer.clinic_id} | Supplies: {supply_ids}")
 
     def delete_ready_routes(self):
         # todos los transfers a PENDING
-        transfers = Transfer.query.filter(Transfer.status == TransferStatus.CONFIRMED).all()
+        transfers = Transfer.query.filter(
+            and_(
+                Transfer.status == TransferStatus.PLANNED,
+                Transfer.operation_id.is_(None)
+            )
+        ).all()
 
         for transfer in transfers:
+            print(f'hola_{transfer.id}')
             transfer.status = TransferStatus.PENDING
             transfer.estimated_arrival_date = None
             transfer.estimated_arrival_time = None
@@ -157,16 +263,18 @@ class Cronjob:
         start_times.pop(0) # los transfers empiezan a partir del segundo
 
         for index, transfer in enumerate(transfers):
+
             transfer_time = self.number_to_time(start_times[index])
             
             print("Actualizo el transfer " + str(transfer.id))
             transfer.estimated_arrival_time = transfer_time
             transfer.estimated_arrival_date = route_date
-            transfer.status = TransferStatus.CONFIRMED # 
+            transfer.status = TransferStatus.PLANNED # 
 
     def create_routes(self, routes, routes_start_service, transfers, date):
         
         for route_index, route in enumerate(routes):
+            print(route)
             route_transfers_order = ",".join(node.delivery_name for node in route)
             
             transfers_ids = [node.delivery_name for node in route] # ids de la ruta
@@ -175,7 +283,11 @@ class Cronjob:
             start_times_order = ",".join(self.number_to_time(start_time) for start_time in start_times)
             
             print(f"Route {route_transfers_order}")
-            route_transfers = [transfer for transfer in transfers if transfer.id in transfers_ids]
+            route_transfers = sorted(
+                [transfer for transfer in transfers if transfer.id in transfers_ids],
+                key=lambda t: transfers_ids.index(t.id)
+            ) # fua
+            
             self.update_routed_transfers(date, route_transfers, start_times) # se mapean por indice
 
             start_depot: Node = route[0] # ventana inicio del depot
@@ -197,12 +309,22 @@ class Cronjob:
         self.session.commit()
 
     # Ejemplo: se ejecuta cada 5 minutos
-    def recalculate_routes(self, days=5, matrix=None):
+    def recalculate_routes(self, days=7, matrix=None):
         today = datetime.today()
         
-        for i in range(days):
+        for i in range(days+1):
             new_date = today + timedelta(days=i)
-            depot = Node(0, 0, (8, 20), 0, 'Depot', None, None) # crear policlinica "depot"
+            depot_start_hour = 9
+            
+            route: Route = (Route.query
+                .filter(Route.date == new_date.date())
+                .order_by(Route.start_time.desc())
+                .first()
+            )
+            if route:
+                depot_start_hour = self.time_to_number(route.end_time) + 0.5 # le sumo media horita
+
+            depot = Node(0, 0, (depot_start_hour, 18), 0, 'Depot', None, None) # crear policlinica "depot"
 
             urgent_deliveries = []
             normal_deliveries = []

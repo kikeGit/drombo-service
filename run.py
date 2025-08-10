@@ -1,13 +1,7 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.dialects.postgresql import ARRAY
-import enum
-import atexit
-
 from app import create_app
 from app.db import db  # ✅ MUST come from app.db, not redefined
 from app.cronjobs import Cronjob
-from app.rigi import RestClient, WebSocket
+#from app.rigi import RestClient, WebSocket
 from app.make_routing import build_flight_time_matrix
 
 app = create_app()
@@ -21,8 +15,8 @@ def main():
         matrix = build_flight_time_matrix()
         print(matrix)
         scheduler = Cronjob(db, app, matrix)
-        scheduler.plan_routes()
-        #scheduler.start()
+        #scheduler.plan_routes()
+        scheduler.start()
         #client = RestClient()
         #websocket = WebSocket()
         #client.get_simulator_list()

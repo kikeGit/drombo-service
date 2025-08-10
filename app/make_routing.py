@@ -80,8 +80,9 @@ def build_flight_time_matrix():
 
         try:
             value = float(time_to_number(route.flight_time_minutes))
-        except (ValueError, TypeError):
+        except (ValueError, TypeError) as e:
             print("error crack")
+            print(str(e))
             value = float('inf')
 
         matrix[dest_idx][origin_idx] = value
