@@ -61,7 +61,7 @@ class Cronjob:
 
 
     def start(self):
-        self.scheduler.add_job(self.plan_routes, 'interval', minutes=1) # habria q poder configurarlo cada cuanto
+        self.scheduler.add_job(self.plan_routes, 'interval', minutes=5) # habria q poder configurarlo cada cuanto
         self.scheduler.add_job(self.check_operation_statuses, 'interval', minutes=0.5) # habria q poder configurarlo cada cuanto
         print("Start scheduler")
         self.scheduler.start()

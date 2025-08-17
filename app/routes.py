@@ -173,7 +173,7 @@ def start_route():
     current_clinic: Clinic = None
     last_transfer = None
     
-    dron_id = 42 # dron 152, simulator 105, 42
+    dron_id = 152 # dron 152, simulator 105, 42
     battery_id = 'CIE-ER-02-042'
     pilot_id = 3000086
     mari_id = 3000080
@@ -235,14 +235,14 @@ def start_route():
         current_clinic = transfer.clinic
         operation_name = f"DROMBO - Vuelo a {current_clinic.name}"
 
-        schedule_time = '2025-07-27 18:44'
+        schedule_time = '2025-08-11 11:00'
         op_payload = {
             "project": 51,
             "name": operation_name,
             "scheduledTime": schedule_time,
             "route": rigi_route.rigi_id,
             "payload": route.weight_at_depot / 1000,
-            #"drone": dron_id,
+            "drone": dron_id,
             "batteries": [battery_id],
             "pic": pilot_id,
             "groundOperators": [mari_id],
@@ -315,14 +315,14 @@ def start_route():
         schedule_time = utc_dt.strftime("%Y-%m-%d %H:%M")
 
     name = f"DROMBO - Vuelta al Hospital Central"
-    schedule_time = '2025-07-27 18:44'
+    schedule_time = '2025-08-11 11:00'
     depot_op_payload = {
         "project": 51,
         "name": name,
         "scheduledTime": schedule_time,
         "route": depot_route.rigi_id,
         "payload": route.weight_at_depot / 1000,
-        #"drone": dron_id,
+        "drone": dron_id,
         "batteries": [battery_id],
         "pic": pilot_id,
         "groundOperators": [mari_id],
