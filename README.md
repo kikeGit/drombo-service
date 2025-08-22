@@ -26,36 +26,59 @@ Se comunica con el **frontend** [drombo-front](https://github.com/mbartesaghi/dr
 
 ## 🛠️ Tecnologías utilizadas
 
-- [Node.js](https://nodejs.org/)  
-- [Express](https://expressjs.com/)
-- [PostgreSQL](https://www.postgresql.org/)
-- [Docker](https://www.docker.com/) para despliegue y contenedores  
+- [Python 3](https://www.python.org/)  
+- [Flask](https://flask.palletsprojects.com/)  
+- [PostgreSQL](https://www.postgresql.org/)  
+- [PgAdmin4](https://www.pgadmin.org/)  
+- [Docker](https://www.docker.com/) + [Docker Compose](https://docs.docker.com/compose/) 
 
----
-
-## 🚀 Instalación y uso
-
-Clonar el repositorio:
+1. **Clonar el repositorio**
 
 ```bash
-git clone https://github.com/kikeGit/drombo-service.git
+git clone git@github.com:kikeGit/drombo-service.git
 cd drombo-service
 ```
 
-Instalar dependencias:
+2. **Instalar dependencias**
 
 ```bash
-npm install
+pip install -r requirements.txt
 ```
 
-Levantar el servidor en desarrollo:
+3. **Levantar base de datos con Docker**
 
 ```bash
-npm run dev
+docker-compose up -d
+```
+
+Esto descargará e inicializará las imágenes `postgres:15` y `dpage/pgadmin4`.  
+
+4. **Conectarse a PgAdmin**  
+   - Ir a: [http://localhost:5050](http://localhost:5050)  
+   - Usuario: `admin@admin.com`  
+   - Password: `admin`  
+
+5. **Crear base de datos**  
+   - Crear una nueva base de datos llamada `drombo` (configuración por defecto).  
+   - Quedará accesible en `localhost:5432`.
+
+6. **Configurar variables de entorno**  
+   Crear un archivo `.env` en la raíz del proyecto con el siguiente contenido:  
+
+```env
+DATABASE_URL=postgresql://username:password@localhost:5432/drombo
+```
+
+*(Reemplazar `username` y `password` por tus credenciales de PostgreSQL)*
+
+7. **Ejecutar la aplicación**
+
+```bash
+python run.py
 ```
 
 El backend quedará disponible en:  
-👉 `http://localhost:3000` (puerto por defecto)
+👉 `http://localhost:5000`
 
 ---
 
